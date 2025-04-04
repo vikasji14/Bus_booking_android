@@ -1,6 +1,6 @@
 {
-  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }],
-  "redirects": [],
-  "headers": [],
-  "cleanUrls": true
+  "version": 2,
+  "public": true,
+  "builds": [{ "src": "web-build/**", "use": "@vercel/static" }],
+  "routes": [{ "src": "/(.*)", "dest": "/index.html" }]
 }
