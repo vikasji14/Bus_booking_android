@@ -1,19 +1,19 @@
 import { useState, useEffect } from "react";
 import { View, Text, TextInput, TouchableOpacity } from "react-native";
-import { auth, signInWithPhoneNumber, RecaptchaVerifier } from "./PhoneNumberLogin/config";
+import { auth, signInWithPhoneNumber, RecaptchaVerifier } from "../config/firebase";
 
 export default function OtpLogin() {
   const [phone, setPhone] = useState("");
   const [otp, setOtp] = useState("");
   const [confirmation, setConfirmation] = useState(null);
 
-  useEffect(() => {
-    if (!window.recaptchaVerifier) {
-      window.recaptchaVerifier = new RecaptchaVerifier(auth, "recaptcha-container", {
-        size: "invisible",
-      });
-    }
-  }, []);
+  // useEffect(() => {
+  //   if (!window.recaptchaVerifier) {
+  //     window.recaptchaVerifier = new RecaptchaVerifier(auth, "recaptcha-container", {
+  //       size: "invisible",
+  //     });
+  //   }
+  // }, []);
 
   // Send OTP to Phone Number
   const sendOtp = async () => {

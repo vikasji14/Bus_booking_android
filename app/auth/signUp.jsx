@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, ImageBackground, Animated, Platform } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, ImageBackground,ScrollView, Animated, Platform } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons"; // For Eye Icon
 
@@ -22,31 +22,29 @@ export default function SignUpScreen() {
     console.log("Sign Up Details:", { name, email, password });
     setLoading(false); // Stop loading
 
-    // try {
-    //   const response = await fetch("https://your-api.com/api/signup", {
-    //     method: "POST",
-    //     headers: {
-    //       "Content-Type": "application/json",
-    //     },
-    //     body: JSON.stringify({ name, email, password }),
-    //   });
+    try {
+      const response = await fetch(`${process.env.EXPO_PUBLIC_SERVER_URL}/auth/create-user`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ name, email, password }),
+      });
 
-    //   const data = await response.json();
-    //   setLoading(false); // Stop loading
-
-    //   if (response.ok) {
-    //     console.log("Signup Successful:", data);
-    //     alert("Signup Successful!");
-    //     router.push("/home"); // Redirect to Home
-    //   } else {
-    //     console.error("Signup Error:", data);
-    //     alert(data.message || "Signup Failed");
-    //   }
-    // } catch (error) {
-    //   setLoading(false);
-    //   console.error("Network Error:", error);
-    //   alert("Network Error, Please try again");
-    // }
+      const data = await response.json();
+      setLoading(false); // Stop loading
+      if (data.success) {
+        console.log("Signup Successful:");
+        router.push("/auth/login"); // Redirect to Home
+      } else {
+        console.error("Signup Error:", data);
+        alert(data.message || "Signup Failed");
+      }
+    } catch (error) {
+      setLoading(false);
+      console.error("Network Error:", error);
+      alert("Network Error, Please try again");
+    }
   };
 
   const handlePressIn = () => {
@@ -58,43 +56,44 @@ export default function SignUpScreen() {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: "#f8f9fa" }}>
-    {/* HEADER WITH BACKGROUND IMAGE */}
-    <ImageBackground
-    source={{ uri: "https://buscdn.cardekho.com/in/ashok-leyland/oyster-tourist-bus/ashok-leyland-oyster-tourist-bus.jpg" }} 
-    style={{
-      height: 300, // Only header height
-      justifyContent: "center",
-      alignItems: "center",
-      paddingTop: Platform.OS === "ios" ? 40 : 0,
-    }}
-    resizeMode="cover"
-  >
-    
-  </ImageBackground>
+    <ScrollView style={{ flex: 1, backgroundColor: "rgba(255, 255, 255, 0.85)" }}>
+      {/* HEADER WITH BACKGROUND IMAGE */}
+      <ImageBackground
+        source={{ uri: "https://buscdn.cardekho.com/in/ashok-leyland/oyster-tourist-bus/ashok-leyland-oyster-tourist-bus.jpg" }}
+        style={{
+          height: 300, // Only header height
+          justifyContent: "center",
+          alignItems: "center",
+          paddingTop: Platform.OS === "ios" ? 40 : 0,
+        }}
+        resizeMode="cover"
+      >
+
+      </ImageBackground>
 
 
-      <View style={{ backgroundColor: "rgba(255, 255, 255, 0.85)", padding: 20, borderRadius: 10 }}>
-        <Text style={{ fontSize: 28, fontWeight: "bold", marginBottom: 20 }}>
-          Sign Up
+      <View style={{ padding: 20, borderRadius: 10 }}>
+      <Text style={{ fontSize: 28, fontWeight: "bold", color: "black", padding: 10, borderRadius: 5 }}>
+          Register
         </Text>
+        
 
         {/* Name Input */}
         <TextInput
-  style={{
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 5,
-    padding: 15,
-    marginBottom: 15,
-    backgroundColor: "white",
-    fontWeight: "bold", // User input bold hoga
-  }}
-  placeholder="Enter your name"
-  placeholderTextColor="#aaa" // Placeholder light gray dikhega
-  value={name}
-  onChangeText={setName}
-/>
+          style={{
+            borderWidth: 1,
+            borderColor: "#ccc",
+            borderRadius: 5,
+            padding: 15,
+            marginBottom: 15,
+            backgroundColor: "white",
+            fontWeight: "bold", // User input bold hoga
+          }}
+          placeholder="Enter your name"
+          placeholderTextColor="#aaa" // Placeholder light gray dikhega
+          value={name}
+          onChangeText={setName}
+        />
 
 
         {/* Email Input */}
@@ -106,12 +105,15 @@ export default function SignUpScreen() {
             padding: 15,
             marginBottom: 15,
             backgroundColor: "white",
+            fontWeight:'bold'
           }}
           placeholder="Enter your email"
           placeholderTextColor="#aaa"
           keyboardType="email-address"
           value={email}
           onChangeText={setEmail}
+
+
         />
 
         {/* Password Input with Toggle Icon */}
@@ -125,10 +127,11 @@ export default function SignUpScreen() {
             backgroundColor: "white",
             paddingHorizontal: 10,
             marginBottom: 15,
+            fontWeight: "bold",
           }}
         >
           <TextInput
-            style={{ flex: 1, padding: 15 }}
+            style={{ flex: 1, padding: 15,fontWeight: "bold", }}
             placeholder="Enter your password"
             placeholderTextColor="#aaa"
             secureTextEntry={!showPassword}
@@ -152,7 +155,7 @@ export default function SignUpScreen() {
           </TouchableOpacity>
         </Animated.View>
 
- 
+
 
         {/* Navigate to Login */}
         <TouchableOpacity onPress={() => router.push("/auth/login")}>
@@ -161,6 +164,6 @@ export default function SignUpScreen() {
           </Text>
         </TouchableOpacity>
       </View>
-      </View>
+    </ScrollView>
   );
 }

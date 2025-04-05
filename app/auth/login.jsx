@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, ImageBackground, Animated, Platform } from "react-native";
+import { View, Text, TextInput,ScrollView, TouchableOpacity, ImageBackground, Animated, Platform } from "react-native";
 import { useRouter } from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons } from "@expo/vector-icons"; // Eye icon for password visibility
 // import {PhoneNumberLogin} from ""; // Import PhoneNumberLogin component
 export default function LoginScreen() {
@@ -11,15 +12,44 @@ export default function LoginScreen() {
   const [loading, setLoading] = useState(false); // Loading state
   const scale = new Animated.Value(1);
 
-  const handleLogin = () => {
-    if ( !email || !password) {
+  const handleLogin = async () => {
+    if (!email || !password) {
       alert("Please fill all fields");
       return;
     }
     setLoading(true); // Start loading
-    console.log("Sign Up Details:", { email, password });
-    setLoading(false); // Stop loading
+    console.log("Login Details:", { email, password });
+  
+    try {
+      const response = await fetch(`${process.env.EXPO_PUBLIC_SERVER_URL}/auth/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",  // ✅ JSON header
+        },
+        credentials: "include", // ✅ If your backend uses cookies (Optional)
+        body: JSON.stringify({ email, password }), // ✅ Convert to JSON
+      });
+  
+      const data = await response.json();
+      console.log("Response Data:", data); // Log the response data
+      setLoading(false); // Stop loading
+  
+      if (data.success) {
+        console.log("Login Successful:", data);
+        await AsyncStorage.setItem("token", data.data);
+        await AsyncStorage.setItem("user-id", data.user._id);
+        router.push("/home"); // Redirect to Home
+      } else {
+        console.log("Login Failed:", data.message);
+        alert(data.message || "Login Failed"); // Show error message
+      }
+    } catch (error) {
+      setLoading(false); // Stop loading
+      console.error("Error logging in:", error);
+    }
   };
+  
+
 
   const handlePressIn = () => {
     Animated.spring(scale, { toValue: 0.95, useNativeDriver: true }).start();
@@ -30,27 +60,29 @@ export default function LoginScreen() {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: "#f8f9fa" }}>
-      
+    <ScrollView style={{ flex: 1, backgroundColor: "rgba(255, 255, 255, 0.85)" }}>
+
+
       {/* HEADER WITH BACKGROUND IMAGE */}
       <ImageBackground
-        source={{ uri: "https://buscdn.cardekho.com/in/ashok-leyland/oyster-tourist-bus/ashok-leyland-oyster-tourist-bus.jpg" }} 
+        source={{ uri: "https://buscdn.cardekho.com/in/ashok-leyland/oyster-tourist-bus/ashok-leyland-oyster-tourist-bus.jpg" }}
         style={{
           height: 300, // Only header height
           justifyContent: "center",
           alignItems: "center",
-          paddingTop: Platform.OS === "ios" ? 40 : 0,
+          paddingTop: Platform.OS === "ios" ? 20 : 40,
         }}
         resizeMode="cover"
       >
-        
+
       </ImageBackground>
 
       {/* LOGIN FORM */}
-      <View style={{ paddingHorizontal:8, paddingTop:60, borderRadius: 10, marginTop: -30, elevation: 5 }}>
-      <Text style={{ fontSize: 28, fontWeight: "bold", color: "black", padding: 10, borderRadius: 5 }}>
+      <View style={{ padding: 20, borderRadius: 10 }}>
+        <Text style={{ fontSize: 28, fontWeight: "bold", color: "black", padding: 10, borderRadius: 5 }}>
           Login
         </Text>
+        
         {/* Email Input */}
         <TextInput
           style={{
@@ -62,7 +94,7 @@ export default function LoginScreen() {
             backgroundColor: "white",
             fontSize: 16,
             fontWeight: "bold",
-            
+
           }}
           placeholder="Enter your email"
           placeholderTextColor="#aaa"
@@ -85,7 +117,7 @@ export default function LoginScreen() {
           }}
         >
           <TextInput
-            style={{ flex: 1, padding: 15, fontSize: 16 , fontWeight: "bold"}}
+            style={{ flex: 1, padding: 15, fontSize: 16, fontWeight: "bold" }}
             placeholder="Enter your password"
             placeholderTextColor="#aaa"
             secureTextEntry={!showPassword}
@@ -109,7 +141,13 @@ export default function LoginScreen() {
           </TouchableOpacity>
         </Animated.View>
 
-        <Text style={{ textAlign: "center", marginVertical: 10 }}>OR</Text>
+        <View style={{  flexDirection: "row", alignItems: "center", width: "70%", marginVertical: 10, justifyContent:'center', marginLeft: 50 }}>
+          <View style={{ flex: 1, height: 1, backgroundColor: "#ccc" }} />
+          <Text style={{ marginHorizontal: 10, color: "#555", fontSize: 16, textAlign: "center" }}>OR</Text>
+          <View style={{ flex: 1, height: 1, backgroundColor: "#ccc" }} />
+        </View>
+
+
 
         {/* Google Login */}
         <TouchableOpacity
@@ -128,10 +166,10 @@ export default function LoginScreen() {
         {/* Navigate to Signup */}
         <TouchableOpacity onPress={() => router.push("/auth/signUp")}>
           <Text style={{ textAlign: "center", marginTop: 15, color: "#007bff" }}>
-            Don't have an account? Sign Up
+            Don't have an account? Register
           </Text>
         </TouchableOpacity>
       </View>
-    </View>
+    </ScrollView>
   );
 }
