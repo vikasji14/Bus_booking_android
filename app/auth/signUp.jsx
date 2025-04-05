@@ -2,7 +2,7 @@ import { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, ImageBackground,ScrollView, Animated, Platform } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons"; // For Eye Icon
-
+import { BASE_URL } from "../config/url";
 export default function SignUpScreen() {
   const router = useRouter();
   const [name, setName] = useState("");
@@ -23,7 +23,7 @@ export default function SignUpScreen() {
     setLoading(false); // Stop loading
 
     try {
-      const response = await fetch(`${process.env.EXPO_PUBLIC_SERVER_URL}/auth/create-user`, {
+      const response = await fetch(`${BASE_URL}/auth/create-user`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -13,7 +13,7 @@
 // import RNPickerSelect from 'react-native-picker-select';
 // import DateTimePicker from '@react-native-community/datetimepicker';
 
-// const SERVER_URL = process.env.EXPO_PUBLIC_SERVER_URL;
+// const BASE_URL = process.env.EXPO_PUBLIC_BASE_URL;
 
 // const BusSearchScreen = () => {
 //     const [cities, setCities] = useState([]);
@@ -25,10 +25,10 @@
 //     const [loading, setLoading] = useState(false);
 //     const [showDatePicker, setShowDatePicker] = useState(false);
 
-//     const SERVER_URL = process.env.EXPO_PUBLIC_SERVER_URL;
+//     const BASE_URL = process.env.EXPO_PUBLIC_BASE_URL;
 //     const fetchCities = async () => {
 //         try {
-//             const response = await axiosInstance.get(`${SERVER_URL}/cities/get-all-cities`);
+//             const response = await axiosInstance.get(`${BASE_URL}/cities/get-all-cities`);
 //             setCities(response.data.data);
 //         } catch (err) {
 //             Alert.alert("Error", "Failed to fetch cities");
@@ -42,7 +42,7 @@
 //         setLoading(true);
 //         try {
 //             const response = await axiosInstance.post(
-//                 `${SERVER_URL}/buses/get?from=${from}&to=${to}&journeyDate=${journeyDate}`
+//                 `${BASE_URL}/buses/get?from=${from}&to=${to}&journeyDate=${journeyDate}`
 //             );
 //             console.log("Filtered Buses Response:", response.data.data);
 //             setBuses(response.data.data);
@@ -265,8 +265,7 @@ import {
 } from 'react-native';
 import axiosInstance from '../app/config/axiosInstance';
 import DateTimePicker from '@react-native-community/datetimepicker';
-
-const SERVER_URL = process.env.EXPO_PUBLIC_SERVER_URL;
+import { BASE_URL } from '../app/config/url';
 
 const BusSearchScreen = () => {
     const [cities, setCities] = useState([]);
@@ -282,7 +281,7 @@ const BusSearchScreen = () => {
 
     const fetchCities = async () => {
         try {
-            const response = await axiosInstance.get(`${SERVER_URL}/cities/get-all-cities`);
+            const response = await axiosInstance.get(`${BASE_URL}/cities/get-all-cities`);
             setCities(response.data.data);
         } catch (err) {
             Alert.alert("Error", "Failed to fetch cities");
@@ -293,7 +292,7 @@ const BusSearchScreen = () => {
         setLoading(true);
         try {
             const response = await axiosInstance.post(
-                `${SERVER_URL}/buses/get?from=${from}&to=${to}&journeyDate=${journeyDate}`
+                `${BASE_URL}/buses/get?from=${from}&to=${to}&journeyDate=${journeyDate}`
             );
             setBuses(response.data.data);
             setStatus(true);
@@ -429,35 +428,36 @@ const BusSearchScreen = () => {
             {/* Journey Date */}
             <Text style={{ fontSize: 16, marginBottom: 6 }}>Journey Date</Text>
             {Platform.OS !== 'web' && (
-                <>
-                    <TouchableOpacity
-                        onPress={() => setShowDatePicker(true)}
-                        style={{
-                            backgroundColor: '#e2e8f0',
-                            padding: 12,
-                            borderRadius: 6,
-                            alignItems: 'center',
-                            marginBottom: 12,
-                        }}
-                    >
-                        <Text style={{ fontSize: 16, color: '#333' }}>{journeyDate.toDateString()}</Text>
-                    </TouchableOpacity>
+  <>
+    <TouchableOpacity
+      onPress={() => setShowDatePicker(true)}
+      style={{
+        backgroundColor: '#e2e8f0',
+        padding: 12,
+        borderRadius: 6,
+        alignItems: 'center',
+        marginBottom: 12,
+      }}
+    >
+      <Text style={{ fontSize: 16, color: '#333' }}>
+        {journeyDate.toISOString().split('T')[0]}
+      </Text>
+    </TouchableOpacity>
 
-                    {showDatePicker && (
-                        <DateTimePicker
-                            value={journeyDate.toISOString().split('T')[0]}
-                            mode="date"
-                            display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-                            minimumDate={new Date()}
-                            onChange={(event, selectedDate) => {
-                                setShowDatePicker(false);
-                                if (selectedDate) setJourneyDate(selectedDate);
-                            }}
-                        />
-                    )}
-                </>
-            )}
-
+    {showDatePicker && (
+      <DateTimePicker
+        value={journeyDate}
+        mode="date"
+        display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+        minimumDate={new Date()}
+        onChange={(event, selectedDate) => {
+          setShowDatePicker(false);
+          if (selectedDate) setJourneyDate(selectedDate);
+        }}
+      />
+    )}
+  </>
+)}
             {Platform.OS === 'web' && (
                 <input
                     type="date"

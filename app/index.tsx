@@ -71,7 +71,7 @@ export default function HomeScreen() {
           }}
           onPressIn={handlePressIn}
           onPressOut={handlePressOut}
-          onPress={() => router.push("/home")}
+          onPress={() => router.push("/auth/login")}
         >
           <Animated.View style={{ backgroundColor: buttonBackgroundColor, padding: 15, borderRadius: 20, width: "100%", alignItems: "center" }}>
             <Text style={{ color: "black", fontSize: 18, fontWeight: "bold" }}>Book Your Bus</Text>

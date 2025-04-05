@@ -3,6 +3,7 @@ import { View, Text, TextInput,ScrollView, TouchableOpacity, ImageBackground, An
 import { useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons } from "@expo/vector-icons"; // Eye icon for password visibility
+import { BASE_URL } from "../config/url"; // Import your base URL
 // import {PhoneNumberLogin} from ""; // Import PhoneNumberLogin component
 export default function LoginScreen() {
   const router = useRouter();
@@ -11,7 +12,7 @@ export default function LoginScreen() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false); // Loading state
   const scale = new Animated.Value(1);
-
+  console.log("base url", BASE_URL);
   const handleLogin = async () => {
     if (!email || !password) {
       alert("Please fill all fields");
@@ -21,7 +22,7 @@ export default function LoginScreen() {
     console.log("Login Details:", { email, password });
   
     try {
-      const response = await fetch(`${process.env.EXPO_PUBLIC_SERVER_URL}/auth/login`, {
+      const response = await fetch(`${BASE_URL}/auth/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",  // ✅ JSON header
