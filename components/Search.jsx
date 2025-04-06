@@ -21,8 +21,8 @@ import Bus from './Bus';
 
 const BusSearchScreen = () => {
     const [cities, setCities] = useState([]);
-    const [from, setFrom] = useState('');
-    const [to, setTo] = useState('');
+    const [from, setFrom] = useState('Patna');
+    const [to, setTo] = useState('Gaya');
     const [fromSuggestions, setFromSuggestions] = useState([]);
     const [toSuggestions, setToSuggestions] = useState([]);
     const [journeyDate, setJourneyDate] = useState(new Date());
@@ -39,6 +39,24 @@ const BusSearchScreen = () => {
             Alert.alert("Error", "Failed to fetch cities");
         }
     };
+
+
+    const rawDate = journeyDate;
+    let displayDate = "Invalid Date";
+    
+    if (rawDate) {
+      try {
+        const dateStr = new Date(rawDate).toDateString(); // eg: "Thu Apr 24 2025"
+        const parts = dateStr.split(" "); // ["Thu", "Apr", "24", "2025"]
+        const day = parts[2]; // 24
+        const month = parts[1]; // Apr
+        const year = parts[3]; // 2025
+        displayDate = `${day} ${month}, ${year}`;
+      } catch (err) {
+        displayDate = "Invalid Date";
+      }
+    }
+    
 
     const getBusesByFilter = useCallback(async () => {
         setLoading(true);
@@ -95,11 +113,11 @@ const BusSearchScreen = () => {
     // console.log("Buses",buses);
 
     return (
-        <View style={{ padding: 16, backgroundColor: '#f5f7fa', flex: 1 }}>
+        <View style={{ padding: 16,flex: 1, backgroundColor: "#f8f9fa", paddingTop: Platform.OS === "ios" ? 40 : 20}}>
 
 
             {/* From Location */}
-            <Text style={{ fontSize: 16, marginBottom: 6, fontFamily: 'bold' }}>Your Location</Text>
+            <Text style={{ fontSize: 16, marginBottom: 6,marginTop:10, fontFamily: 'bold' }}>Your Location</Text>
             <View
                 style={{
                     flexDirection: 'row',
@@ -116,12 +134,12 @@ const BusSearchScreen = () => {
 
                 {/* FROM SECTION */}
                 <View style={{ flex: 1, padding: 10 }}>
-                    <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                         <Image
                             source={fromImage}
                             style={{ width: 20, height: 20, marginRight: 6 }}
                         />
-                        <Text style={{ fontSize: 14, color: '#888' }}>From</Text>
+                        <Text style={{ fontSize: 14,fontFamily:'bold', color: '#888' }}>From</Text>
                     </View>
 
 
@@ -164,16 +182,16 @@ const BusSearchScreen = () => {
                 <View
                     style={{
                         position: 'absolute',
-                        top: 120, // change based on input position
+                        top: 130, // change based on input position
                         left: 16,
                         // right: 16,
                         width: '45%',
                         zIndex: 999,
-                        backgroundColor: 'rgba(255, 255, 255, 0.9)', // 👈 semi-transparent white
+                        backgroundColor: 'rgba(255, 255, 255, 1)', // 👈 semi-transparent white
                         borderWidth: 1,
                         borderColor: '#eee',
                         borderRadius: 8,
-                        maxHeight: 150,
+                        maxHeight: 400,
                         elevation: 5, // Android shadow
                         shadowColor: '#000', // iOS shadow
                         shadowOffset: { width: 0, height: 2 },
@@ -205,16 +223,16 @@ const BusSearchScreen = () => {
                 <View
                     style={{
                         position: 'absolute',
-                        top: 120, // change based on input position
+                        top: 130, // change based on input position
                         // left: 16,
                         right: 16,
                         zIndex: 999,
                         width: '45%',
-                        backgroundColor: 'rgba(255, 255, 255, 0.9)', // 👈 semi-transparent white
+                        backgroundColor: 'rgba(255, 255, 255, 1)', // 👈 semi-transparent white
                         borderWidth: 1,
                         borderColor: '#eee',
                         borderRadius: 8,
-                        maxHeight: 150,
+                        maxHeight: 400,
                         elevation: 5, // Android shadow
                         shadowColor: '#000', // iOS shadow
                         shadowOffset: { width: 0, height: 2 },
@@ -244,7 +262,7 @@ const BusSearchScreen = () => {
 
 
             {/* Journey Date */}
-            <Text style={{ fontSize: 16, marginBottom: 6 }}>Journey Date</Text>
+            <Text style={{ fontSize: 16, marginBottom: 6 }}>Chose Your Journey Date</Text>
             {Platform.OS !== 'web' && (
                 <>
                     <TouchableOpacity
@@ -258,7 +276,7 @@ const BusSearchScreen = () => {
                         }}
                     >
                         <Text style={{ fontSize: 16, color: '#333' }}>
-                            {journeyDate.toISOString().split('T')[0]}
+                            {displayDate}
                         </Text>
                     </TouchableOpacity>
 
@@ -317,7 +335,7 @@ const BusSearchScreen = () => {
 
             {buses.length > 0 && (
                 <>
-                    <Text style={{ fontSize: 18, fontWeight: '600', marginBottom: 12 }}>
+                    <Text style={{ fontSize: 18, fontWeight: '600', marginBottom: 16 }}>
                         Available Buses:
                     </Text>
                         <Bus bus={buses} />
