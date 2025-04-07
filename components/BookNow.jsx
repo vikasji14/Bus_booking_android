@@ -1,20 +1,3 @@
-// import { Text, View } from "react-native";
-// import React from "react";
-// import { useLocalSearchParams } from "expo-router";
-
-// export default function BookNow() {
-//   const { busId, journeyDate } = useLocalSearchParams();
-
-//   return (
-//     <View style={{ padding: 20 }}>
-//       <Text style={{ fontWeight: "bold" }}>Bus ID: {busId}</Text>
-//       <Text>Journey Date: {journeyDate}</Text>
-//     </View>
-//   );
-// }
-
-
-
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Alert, ScrollView } from 'react-native';
 import { BASE_URL } from '../app/config/url';
@@ -26,6 +9,9 @@ import moment from 'moment';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useLocalSearchParams } from 'expo-router';
 import SeatSelection from './SeatSelection';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import RazorpayCheckout from 'react-native-razorpay';
+
 
 export default function BookNow() {
 
@@ -37,11 +23,8 @@ export default function BookNow() {
   const [bus, setBus] = useState(null);
   const [selectedSeats, setSelectedSeats] = useState([]);
   const { busId, journeyDate } = useLocalSearchParams();
-
-  // const totalPrice = basePrice * selectedSeats?.length;
-
-  // const discountAmount = totalPrice * (discount / 100);
-  // const finalAmount = totalPrice - discountAmount;
+  const [user, setUser] = useState(null);
+  const [razorpayLoaded, setRazorpayLoaded] = useState(false);
   useEffect(() => {
     const fetchBusDetails = async () => {
       try {
@@ -56,7 +39,18 @@ export default function BookNow() {
     fetchBusDetails();
   }, []);
 
+  useEffect(() => {
+    const fetchUserId = async () => {
+      try {
+        const id = await AsyncStorage.getItem('user-id');
+        setUser(id);
+      } catch (error) {
+        console.error('Failed to load user_id:', error);
+      }
+    };
 
+    fetchUserId();
+  }, []);
   const validateMobile = () => {
     const regex = /^[6-9]\d{9}$/;
     if (!regex.test(mobile)) {
@@ -76,16 +70,83 @@ export default function BookNow() {
     return true;
   };
 
-  const handleSubmit = () => {
+  useEffect(() => {
+    const script = document.createElement('script');
+    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+    script.async = true;
+    script.onload = () => setRazorpayLoaded(true);
+    script.onerror = () => {
+      console.error('Failed to load Razorpay script');
+    };
+    document.body.appendChild(script);
+
+    return () => {
+      document.body.removeChild(script);
+    };
+  }, []);
+
+  const handleSubmit = async () => {
     const isMobileValid = validateMobile();
     const isAddressValid = validateAddress();
-    if (selectedSeats.length === 0) {
-      setBusSelectedError('Please select at least one seat');
+    
+    if (!isMobileValid || !isAddressValid || selectedSeats.length === 0) {
+      if (selectedSeats.length === 0) {
+        setBusSelectedError('Please select at least one seat');
+      }
+      return;
     }
-    if (isMobileValid && isAddressValid) {
-      Alert.alert('Success', 'Proceeding to payment...');
+  
+    try {
+      const response = await axiosInstance.post(`${BASE_URL}/bookings/create-order`, {
+        amount: (bus?.price * (1 - (bus?.discountPercentage || 0) / 100) * selectedSeats?.length) * 100
+      });
+  
+      const options = {
+        description: 'Bus Ticket Booking',
+        image: 'https://your-logo-url.png',
+        currency: 'INR',
+        key: 'rzp_test_sy54SSBzD8tp1c', // Replace with your Razorpay key
+        amount: response.data.amount,
+        name: 'Bus Booking System',
+        order_id: response.data.id,
+        prefill: {
+          contact: mobile,
+          name: "Vikas" // replace with user?.name if available
+        },
+        theme: { color: '#2563eb' }
+      };
+      console.log("Trying to open Razorpay...");
+      RazorpayCheckout.open(options).then(async (paymentData) => {
+        console.log("Payment success", paymentData);
+        console.log("RazorpayCheckout is: ", RazorpayCheckout);
+
+        try {
+          await axiosInstance.post(`${BASE_URL}/bookings/verify-payment`, {
+            paymentId: paymentData.razorpay_payment_id,
+            bookingDetails: {
+              bus: bus._id,
+              user: user,
+              seats: selectedSeats,
+              mobile: mobile,
+              journeyDate: journeyDate,
+              address: address,
+              transactionId: paymentData.razorpay_payment_id
+            }
+          });
+  
+          console.log('Booking successful!');
+        } catch (error) {
+          console.error('Payment verification failed:', error);
+        }
+      }).catch((error) => {
+        console.error('Payment failed:', error);
+      });
+  
+    } catch (error) {
+      console.error('Payment error:', error);
     }
   };
+  
 
   const discountedPrice = (bus?.price * (1 - (bus?.discountPercentage || 0) / 100)).toFixed(2);
 

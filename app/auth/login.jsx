@@ -1,7 +1,17 @@
 import { useState } from "react";
 import { View, Text, TextInput,ScrollView, TouchableOpacity, ImageBackground, Animated, Platform } from "react-native";
 import { useRouter } from "expo-router";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+const saveUserId = async (id) => {
+  try {
+    await AsyncStorage.setItem('user_id', id);
+    console.log('User ID saved:', id);
+  } catch (error) {
+    console.log('Error saving user ID:', error);
+  }
+};
+
 import { Ionicons } from "@expo/vector-icons"; // Eye icon for password visibility
 import { BASE_URL } from "../config/url"; // Import your base URL
 // import {PhoneNumberLogin} from ""; // Import PhoneNumberLogin component

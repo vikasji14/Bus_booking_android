@@ -8,6 +8,8 @@ import TabBarBackground from '@/components/ui/TabBarBackground';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Ionicons } from '@expo/vector-icons';
+import { FontAwesome5, MaterialIcons } from '@expo/vector-icons';
+
 export default function TabLayout() {
   const colorScheme = useColorScheme();
 
@@ -30,11 +32,33 @@ export default function TabLayout() {
         name="home"
         options={{
           title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
+          tabBarIcon: ({ color }) => (
+            <FontAwesome5 name="home" size={24} color={color} />
+          ),
         }}
       />
 
+      <Tabs.Screen
+        name="ticketView"
+        options={{
+          title: 'Tickets',
+          tabBarIcon: ({ color }) => (
+            <MaterialIcons name="confirmation-number" size={24} color={color} />
+          ),
+        }}
+      />
 
+      <Tabs.Screen
+        name="profile"
+        options={{
+          title: 'Profile',
+          tabBarIcon: ({ color }) => (
+            <FontAwesome5 name="user-circle" size={24} color={color} />
+          ),
+        }}
+      />
     </Tabs>
+
+
   );
 }
